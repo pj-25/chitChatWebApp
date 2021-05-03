@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>ChitChat</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="res/stylesheets/style.css">
+        <link rel='icon' type="image/png" href="res/images/chitchat_logo.png">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">  
+    </head>
+    <body class="theme">
+        <div class="title-pane">
+            <img src="res/images/chitchat_logo.png" width="60px" alt="chitchat Logo"> <img src="res/images/chitChatTransparent.png" height="40rem" alt="ChitChat"> <i class="bi bi-chat-quote-fill"></i> Group Chat
+        </div>
+        <div class='msg-pane'>
+            <ul id="messages">
+
+            </ul>    
+        </div>
+        <div class="msg-input-pane">
+            <i class="bi bi-chat-right-text-fill"></i>
+            <input type="text" id="msg" name="Message" placeholder="Enter your message here..."/>
+            <button onclick="sendMsg()"><i class="bi bi-arrow-right-circle-fill"></i> Send</button>
+        </div>
+    </body>
+
+    <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
+    <script>
+    
+        function askUserName(){
+            var name = prompt('Enter user name:');
+            if(name !== null && name !== ''){
+                return name;
+            }
+            else{
+                return askUserName();
+            }
+        }
+        var userName = askUserName();
+
+        var socket = io();
+        var messages = document.getElementById('messages');
+
+        socket.on('message', (msg)=>{
+            console.log(msg);
+            printMsg(msg);
+        });
+        
+        function sendMsg(){
+            let msgField = document.getElementById('msg');
+            if(msgField.value){
+                socket.emit('message', {'name': userName,
+                                        'content': msgField.value
+                                            });
+                msgField.value = '';
+            }
+        }
+
+        function printMsg(msg){
+            var msgBox = document.createElement('ul');
+            msgBox.className = "msg-box";
+
+            var nameli = document.createElement('li');
+            var nameValue = msg.name;
+            if(nameValue===userName){
+                nameValue = 'Me';
+            }
+            nameli.appendChild(document.createTextNode(nameValue));
+            msgBox.appendChild(nameli);
+
+            var msgli = document.createElement('li');
+            msgli.appendChild(document.createTextNode(msg.content));
+            msgBox.appendChild(msgli);
+
+            var messages = document.getElementById('messages');
+            messages.appendChild(msgBox);
+        }
+    </script>
+</html>
